@@ -56,6 +56,9 @@ WS      [ \t]+
 "}"             { printf("<}>\n"); }
 ","             { printf("<,>\n"); }
 ";"             { printf("<;>\n"); }
+"\""            { printf("<\">\n");}
+\"([^\"\n]*)\"    { printf("<literal, %s>\n", yytext); }
+
 
 "//".*          { printf("<comentario>\n"); }
 "/*"([^*]|\*+[^*/])*\*+"/" { printf("<comentario>\n"); }
