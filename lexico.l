@@ -35,7 +35,7 @@ WS      [ \t]+
 "while"         { printf("<while>\n"); }
 "return"        { printf("<return>\n"); }
 "function"      { printf("<function>\n"); }
-"array"         { printf("<array>\n"); }
+"array"         { printf("<array>\n"); } //REMOVER?
 
 {REAL}          { printf("<real, %s>\n", yytext); }
 {NUM}           { printf("<num, %s>\n", yytext); }
@@ -48,14 +48,15 @@ WS      [ \t]+
 "!="            { printf("<!=>\n"); }
 "<"             { printf("<<>\n"); }
 ">"             { printf("<>>\n"); }
-"="             { printf("<=\n"); }
+"="             { printf("<=>\n"); }
 
 "("             { printf("<(>\n"); }
 ")"             { printf("<)>\n"); }
 "{"             { printf("<{>\n"); }
 "}"             { printf("<}>\n"); }
 ","             { printf("<,>\n"); }
-";"             { printf("<;>\n"); }
+":"             { printf("<:>\n"); }
+";"             { printf("<;>\n"); } //REMOVER, NAO ESTA NA LINGUAGEM
 "\""            { printf("<\">\n");}
 \"([^\"\n]*)\"    { printf("<literal, %s>\n", yytext); }
 
