@@ -24,6 +24,9 @@ int get_symbol_position(const char *id) {
 ID      [a-zA-Z_][a-zA-Z0-9_]*
 NUM     [0-9]+
 REAL    [0-9]+\.[0-9]+
+LITERAL\"([^\\\"\n]*)\"
+
+
 WS      [ \t]+
 
 %%
@@ -36,9 +39,6 @@ WS      [ \t]+
 "aparatar"        { printf("<aparatar>\n"); }
 "feitiço"      { printf("<feitiço>\n"); }
 
-{REAL}          { printf("<real, %s>\n", yytext); }
-{NUM}           { printf("<num, %s>\n", yytext); }
-\"([^\"\n]*)\"  { printf("<literal, %s>\n", yytext); }
 
 "+"             { printf("<+>\n"); }
 "-"             { printf("<->\n"); }
@@ -52,6 +52,7 @@ WS      [ \t]+
 
 "("             { printf("<(>\n"); }
 ")"             { printf("<)>\n"); }
+"\""            { printf("<\">\n"); }
 ":"             { printf("<:>\n"); }
 "~>"                         { printf("<~>\n"); }
 "~>\\*"([^*]|\*+[^*/])*\*+"/" { printf("<comentario>\n"); }
@@ -61,6 +62,9 @@ WS      [ \t]+
     int pos = get_symbol_position(yytext);
     printf("<id, %d>\n", pos);
 }
+{REAL}          { printf("<real, %s>\n", yytext); }
+{NUM}           { printf("<num, %s>\n", yytext); }
+{LITERAL}       { printf("<literal, %s>\n", yytext); }
 
 {WS}            { /* ignora espaço/tabulação */ }
 \n              { /* ignora nova linha */ }
