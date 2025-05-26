@@ -28,17 +28,17 @@ WS      [ \t]+
 
 %%
 
-"int"           { printf("<int>\n"); }
-"float"         { printf("<float>\n"); }
-"if"            { printf("<if>\n"); }
-"else"          { printf("<else>\n"); }
-"while"         { printf("<while>\n"); }
-"return"        { printf("<return>\n"); }
-"function"      { printf("<function>\n"); }
-"array"         { printf("<array>\n"); } //REMOVER?
+"accioint"           { printf("<accioint>\n"); }
+"acciofloat"         { printf("<acciofloat>\n"); }
+"veritaserum"            { printf("<veritaserum>\n"); }
+"crucio"          { printf("<crucio>\n"); }
+"conjurar"         { printf("<conjurar>\n"); }
+"aparatar"        { printf("<aparatar>\n"); }
+"feitiço"      { printf("<feitiço>\n"); }
 
 {REAL}          { printf("<real, %s>\n", yytext); }
 {NUM}           { printf("<num, %s>\n", yytext); }
+\"([^\"\n]*)\"  { printf("<literal, %s>\n", yytext); }
 
 "+"             { printf("<+>\n"); }
 "-"             { printf("<->\n"); }
@@ -52,17 +52,10 @@ WS      [ \t]+
 
 "("             { printf("<(>\n"); }
 ")"             { printf("<)>\n"); }
-"{"             { printf("<{>\n"); }
-"}"             { printf("<}>\n"); }
-","             { printf("<,>\n"); }
 ":"             { printf("<:>\n"); }
-";"             { printf("<;>\n"); } //REMOVER, NAO ESTA NA LINGUAGEM
-"\""            { printf("<\">\n");}
-\"([^\"\n]*)\"    { printf("<literal, %s>\n", yytext); }
+"~>"                         { printf("<~>\n"); }
+"~>\\*"([^*]|\*+[^*/])*\*+"/" { printf("<comentario>\n"); }
 
-
-"//".*          { printf("<comentario>\n"); }
-"/*"([^*]|\*+[^*/])*\*+"/" { printf("<comentario>\n"); }
 
 {ID} {
     int pos = get_symbol_position(yytext);
