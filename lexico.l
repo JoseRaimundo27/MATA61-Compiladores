@@ -38,6 +38,7 @@ WS      [ \t]+
 "conjurar"         { printf("<conjurar>\n"); }
 "aparatar"        { printf("<aparatar>\n"); }
 "feitiço"      { printf("<feitiço>\n"); }
+"relicario"      { printf("<relicario>\n"); }
 
 
 "+"             { printf("<+>\n"); }
@@ -55,8 +56,10 @@ WS      [ \t]+
 "\""            { printf("<\">\n"); }
 ":"             { printf("<:>\n"); }
 ","             { printf("<,>\n"); }
-"~>"                         { printf("<~>\n"); }
-"~>\\*"([^*]|\*+[^*/])*\*+"/" { printf("<comentario>\n"); }
+"["             { printf("<[>\n"); }
+"]"             { printf("<]>\n"); }
+
+"~>".*          { printf("<~>>\n");}
 
 
 {ID} {
