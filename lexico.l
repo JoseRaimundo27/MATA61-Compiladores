@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "parser.tab.h"
+#include "tree.h"
+
 
 #define MAX_SYMBOLS 100
 
@@ -24,70 +27,79 @@ int get_symbol_position(const char *id) {
 ID      [a-zA-Z_][a-zA-Z0-9_]*
 NUM     [0-9]+
 REAL    [0-9]+\.[0-9]+
-LITERAL\"([^\\\"\n]*)\"
+
 
 
 WS      [ \t]+
 
 %%
 
-"accioint"           { printf("<accioint>\n"); }
-"acciofloat"         { printf("<acciofloat>\n"); }
-"veritaserum"            { printf("<veritaserum>\n"); }
-"crucio"          { printf("<crucio>\n"); }
-"conjurar"         { printf("<conjurar>\n"); }
-"aparatar"        { printf("<aparatar>\n"); }
-"feitiço"      { printf("<feitiço>\n"); }
-"relicario"      { printf("<relicario>\n"); }
+"accioint"      { return ACCIOINT; }
+"acciofloat"    { return ACCIOFLOAT; }
+"veritaserum"   { return VERITASERUM; }
+"crucio"        { return CRUCIO; }
+"conjurar"      { return CONJURAR; }
+"aparatar"      { return APARATAR; }
+"feitiço"       { return FEITICO; }
+"relicario"     { return RELICARIO; }
+"revelio"       { return REVELIO; }
+"lumos"         { return LUMOX; }
+"nox"           { return NOX; }
 
+"=="            { return EQ; }
+"!="            { return NEQ; }
+"<="            { return LE; }
+">="            { return GE; }
+"<"             { return LT; }
+">"             { return GT; }
 
-"+"             { printf("<+>\n"); }
-"-"             { printf("<->\n"); }
-"*"             { printf("<*>\n"); }
-"/"             { printf("</>\n"); }
-"=="            { printf("<==>\n"); }
-"!="            { printf("<!=>\n"); }
-"<"             { printf("<<>\n"); }
-">"             { printf("<>>\n"); }
-"="             { printf("<=>\n"); }
-"=>"            { printf("<=>>\n"); }
+"+"             { return PLUS; }
+"-"             { return MINUS; }
+"*"             { return TIMES; }
+"/"             { return DIV; }
+"="             { return ASSIGN; }
+"=>"            { return ARROW; }
 
-"("             { printf("<(>\n"); }
-")"             { printf("<)>\n"); }
-"\""            { printf("<\">\n"); }
-":"             { printf("<:>\n"); }
-","             { printf("<,>\n"); }
-"["             { printf("<[>\n"); }
-"]"             { printf("<]>\n"); }
-
-"~>".*          { printf("<~>>\n");}
-
+":"             { return ':'; }
+","             { return ','; }
+"("             { return '('; }
+")"             { return ')'; }
+"["             { return '['; }
+"]"             { return ']'; }
 
 {ID} {
-    int pos = get_symbol_position(yytext);
-    printf("<id, %d>\n", pos);
+    yylval.str = strdup(yytext);
+    return ID;
 }
-{REAL}          { printf("<real, %s>\n", yytext); }
-{NUM}           { printf("<num, %s>\n", yytext); }
-{LITERAL}       { printf("<literal, %s>\n", yytext); }
 
-{WS}            { /* ignora espaço/tabulação */ }
-\n              { /* ignora nova linha */ }
-.               { printf("Token desconhecido: %s\n", yytext); }
+{NUM} {
+    yylval.num = atoi(yytext);
+    return NUM;
+}
+
+{REAL} {
+    yylval.fnum = atof(yytext);
+    return REAL;
+}
+
+
+"~>".* {
+    // ignora comentários mágicos
+}
+
+[ \t]+      { /* ignora espaços apenas */ }
+\n          { return '\n'; } 
+
+\"([^\\\"\n]*)\" {
+    char* raw = strdup(yytext);
+    raw[yyleng - 1] = '\0';           // remove aspa final
+    yylval.str = strdup(raw + 1);     // remove aspa inicial
+    free(raw);
+    return LITERAL;
+}
+
+. {
+    printf("Token desconhecido: %s\n", yytext);
+}
 
 %%
-
-int main(int argc, char **argv) {
-    yylex();
-
-    // Mostra tabela de símbolos (opcional para debug)
-    /*
-    printf("\nTabela de Símbolos:\n");
-    for (int i = 0; i < symbol_count; i++) {
-        printf("[%d] %s\n", i, symbol_table[i]);
-        free(symbol_table[i]);  // Libera memória
-    }
-    */
-
-    return 0;
-}
