@@ -1,8 +1,4 @@
-x: accioint = 5
-y: acciofloat = 3.14
-nome: relicario accioint = [1, 2, 3]
-valores: relicario acciofloat = [1.1, 2.2, 3.3]
-revelio("Oi")
-revelio("Oi", x)
-revelio("Mensagem", x, y + 1, z * 2)
-revelio("Nome:", nome)
+feitico (x < 3)
+lumox
+    veritaserum(x);
+nox;

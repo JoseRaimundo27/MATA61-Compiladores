@@ -40,10 +40,10 @@ WS      [ \t]+
 "crucio"        { return CRUCIO; }
 "conjurar"      { return CONJURAR; }
 "aparatar"      { return APARATAR; }
-"feitiço"       { return FEITICO; }
+"feitico"       { return FEITICO; }
 "relicario"     { return RELICARIO; }
 "revelio"       { return REVELIO; }
-"lumos"         { return LUMOX; }
+"lumox"         { return LUMOX; }
 "nox"           { return NOX; }
 
 "=="            { return EQ; }
@@ -66,6 +66,8 @@ WS      [ \t]+
 ")"             { return ')'; }
 "["             { return '['; }
 "]"             { return ']'; }
+";"     { return ';'; }
+
 
 {ID} {
     yylval.str = strdup(yytext);
@@ -87,8 +89,9 @@ WS      [ \t]+
     // ignora comentários mágicos
 }
 
-[ \t]+      { /* ignora espaços apenas */ }
-\n          { return '\n'; } 
+[\t\r ]+    ;     // ignora espaço, tab e return
+[\n]+ ;
+
 
 \"([^\\\"\n]*)\" {
     char* raw = strdup(yytext);

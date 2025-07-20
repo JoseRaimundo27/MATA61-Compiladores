@@ -29,76 +29,137 @@ Node* root;
 %token LUMOX NOX
 %token ACCIOINT ACCIOFLOAT VERITASERUM CRUCIO CONJURAR APARATAR FEITICO RELICARIO REVELIO
 
-%type <node> programa lista_declaracoes declaracao
+%type <node> programa lista_declaracoes instrucao declaracao atribuicao chamada_revelio chamada_veritaserum instrucao_conjurar chamada_aparatar instrucao_feitico lista_params
 %type <node> expressao
 %type <node> vetor lista_elementos
 %type <node> vetor_float lista_elementos_float
 %type <node> lista_args
 
+%left EQ NEQ
+%left LT GT LE GE
 %left PLUS MINUS
 %left TIMES DIV
 
+
 %%
 
-/* ---------------------- Programa e Bloco ---------------------- */
 programa:
     lista_declaracoes {
         root = create_node("program", 1, $1);
     }
-    ;
+;
 
 lista_declaracoes:
-    lista_declaracoes declaracao fim_stmt {
-        $$ = create_node("statement_list", 2, $1, $2);
+    lista_declaracoes instrucao fim_stmt {
+        Node* list = $1;
+        list->children = realloc(list->children, sizeof(Node*) * (list->num_children + 1));
+        list->children[list->num_children++] = $2;
+        $$ = list;
     }
-  | declaracao fim_stmt {
+  | lista_declaracoes instrucao_conjurar {
+        Node* list = $1;
+        list->children = realloc(list->children, sizeof(Node*) * (list->num_children + 1));
+        list->children[list->num_children++] = $2;
+        $$ = list;
+    }
+  | lista_declaracoes instrucao_feitico {
+        Node* list = $1;
+        list->children = realloc(list->children, sizeof(Node*) * (list->num_children + 1));
+        list->children[list->num_children++] = $2;
+        $$ = list;
+    }
+  | instrucao fim_stmt {
         $$ = create_node("statement_list", 1, $1);
     }
-  ;
+  | instrucao_conjurar {
+        $$ = create_node("statement_list", 1, $1);
+    }
+  | instrucao_feitico {
+        $$ = create_node("statement_list", 1, $1);
+    }
+;
 
 fim_stmt:
-    '\n'
-  | /* vazio */  // permite que não tenha \n final
-  ;
+    ';'
+;
 
+instrucao:
+    declaracao
+  | atribuicao
+  | chamada_revelio
+  | chamada_veritaserum
+  | chamada_aparatar
+;
 
-/* ---------------------- Declarações ---------------------- */
 declaracao:
     ID ':' ACCIOINT ASSIGN expressao {
-        Node* id_node = create_node($1, 0);
-        Node* tipo_node = create_node("accioint", 0);
-        $$ = create_node("declaration", 3, id_node, tipo_node, $5);
+        $$ = create_node("declaration", 4, create_node($1, 0), create_node("accioint", 0), create_node("=", 0), $5);
     }
   | ID ':' ACCIOFLOAT ASSIGN expressao {
-        Node* id_node = create_node($1, 0);
-        Node* tipo_node = create_node("acciofloat", 0);
-        $$ = create_node("declaration", 3, id_node, tipo_node, $5);
+        $$ = create_node("declaration", 4, create_node($1, 0), create_node("acciofloat", 0), create_node("=", 0), $5);
     }
   | ID ':' RELICARIO ACCIOINT ASSIGN vetor {
-        Node* id_node = create_node($1, 0);
-        Node* tipo_node = create_node("relicario accioint", 0);
-        $$ = create_node("declaration", 3, id_node, tipo_node, $6);
+        $$ = create_node("declaration", 4, create_node($1, 0), create_node("relicario accioint", 0), create_node("=", 0), $6);
     }
   | ID ':' RELICARIO ACCIOFLOAT ASSIGN vetor_float {
-        Node* id_node = create_node($1, 0);
-        Node* tipo_node = create_node("relicario acciofloat", 0);
-        $$ = create_node("declaration", 3, id_node, tipo_node, $6);
+        $$ = create_node("declaration", 4, create_node($1, 0), create_node("relicario acciofloat", 0), create_node("=", 0), $6);
     }
-  | ID ASSIGN expressao {
-        Node* id_node = create_node($1, 0);
-        $$ = create_node("assignment", 2, id_node, $3);
+;
+
+atribuicao:
+    ID ASSIGN expressao {
+        $$ = create_node("instrucao", 1, create_node("=", 2, create_node($1, 0), $3));
     }
-  | REVELIO '(' LITERAL ')' {
-        Node* msg_node = create_node($3, 0);
-        $$ = create_node("revelio", 1, msg_node);
+;
+
+instrucao_conjurar:
+    CONJURAR ID '(' lista_params ')' LUMOX lista_declaracoes NOX ';' {
+        $$ = create_node("conjurar", 3, create_node($2, 0), $4, $7);
+    }
+  | CONJURAR ID '(' ')' LUMOX lista_declaracoes NOX ';' {
+        $$ = create_node("conjurar", 3, create_node($2, 0), create_node("args", 0), $6);
+    }
+;
+
+instrucao_feitico:
+    FEITICO '(' expressao ')' LUMOX lista_declaracoes NOX ';' {
+        $$ = create_node("feitico", 2, create_node("()", 1, $3), $6);
+    }
+;
+
+chamada_aparatar:
+    APARATAR ID '(' lista_args ')' {
+        $$ = create_node("aparatar", 2, create_node($2, 0), $4);
+    }
+  | APARATAR ID '(' ')' {
+        $$ = create_node("aparatar", 2, create_node($2, 0), create_node("args", 0));
+    }
+;
+
+chamada_revelio:
+    REVELIO '(' LITERAL ')' {
+        $$ = create_node("revelio", 1, create_node($3, 0));
     }
   | REVELIO '(' LITERAL ',' lista_args ')' {
-        Node* msg_node = create_node($3, 0);
-        $$ = create_node("revelio", 2, msg_node, $5);
+        $$ = create_node("revelio", 2, create_node($3, 0), $5);
     }
-  ;
+;
 
-/* ---------------------- Expressões ---------------------- */
+chamada_veritaserum:
+    VERITASERUM '(' ID ')' {
+        $$ = create_node("veritaserum", 1, create_node($3, 0));
+    }
+;
+
+lista_params:
+    ID {
+        $$ = create_node("args", 1, create_node($1, 0));
+    }
+  | ID ',' lista_params {
+        $$ = create_node("args", 2, create_node($1, 0), $3);
+    }
+;
+
 expressao:
     NUM {
         char buffer[64];
@@ -130,14 +191,34 @@ expressao:
   | expressao DIV expressao {
         $$ = create_node("/", 2, $1, $3);
     }
-  ;
+  | '(' expressao ')' {
+        $$ = create_node("()", 1, $2);
+    }
+      | expressao LT expressao {
+        $$ = create_node("<", 2, $1, $3);
+    }
+  | expressao LE expressao {
+        $$ = create_node("<=", 2, $1, $3);
+    }
+  | expressao GT expressao {
+        $$ = create_node(">", 2, $1, $3);
+    }
+  | expressao GE expressao {
+        $$ = create_node(">=", 2, $1, $3);
+    }
+  | expressao EQ expressao {
+        $$ = create_node("==", 2, $1, $3);
+    }
+  | expressao NEQ expressao {
+        $$ = create_node("!=", 2, $1, $3);
+    }
+;
 
-/* ---------------------- Vetores ---------------------- */
 vetor:
     '[' lista_elementos ']' {
         $$ = create_node("vetor", 1, $2);
     }
-    ;
+;
 
 lista_elementos:
     NUM {
@@ -151,13 +232,13 @@ lista_elementos:
         Node* num_node = create_node(buffer, 0);
         $$ = create_node("elementos", 2, $1, num_node);
     }
-  ;
+;
 
 vetor_float:
     '[' lista_elementos_float ']' {
         $$ = create_node("vetor", 1, $2);
     }
-    ;
+;
 
 lista_elementos_float:
     REAL {
@@ -171,9 +252,8 @@ lista_elementos_float:
         Node* real_node = create_node(buffer, 0);
         $$ = create_node("elementos", 2, $1, real_node);
     }
-  ;
+;
 
-/* ---------------------- Lista de argumentos para revelio ---------------------- */
 lista_args:
     expressao {
         $$ = create_node("args", 1, $1);
@@ -181,7 +261,7 @@ lista_args:
   | expressao ',' lista_args {
         $$ = create_node("args", 2, $1, $3);
     }
-  ;
+;
 
 %%
 

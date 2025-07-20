@@ -20,17 +20,25 @@ Node* create_node(const char* label, int num_children, ...) {
     return node;
 }
 
-void print_tree(Node* node, int indent) {
-    if (strcmp(node->label, "statement_list") == 0) {
-        for (int i = 0; i < node->num_children; i++) {
-            print_tree(node->children[i], indent); // sem aumentar indent
-        }
-    } else {
-        for (int i = 0; i < indent; i++) printf("  ");
-        printf("%s\n", node->label);
-        for (int i = 0; i < node->num_children; i++) {
-            print_tree(node->children[i], indent + 1);
-        }
+#include <stdbool.h>
+
+void print_tree_ascii(Node* node, const char* prefix, int is_last) {
+    printf("%s", prefix);
+    printf("%s", is_last ? "`-- " : "|-- ");
+    printf("%s\n", node->label);
+
+    char new_prefix[1024];
+    snprintf(new_prefix, sizeof(new_prefix), "%s%s", prefix, is_last ? "    " : "|   ");
+
+    for (int i = 0; i < node->num_children; i++) {
+        print_tree_ascii(node->children[i], new_prefix, i == node->num_children - 1);
+    }
+}
+
+void print_tree(Node* node, int unused) {
+    printf("[ROOT] %s\n", node->label);
+    for (int i = 0; i < node->num_children; i++) {
+        print_tree_ascii(node->children[i], "", i == node->num_children - 1);
     }
 }
 
