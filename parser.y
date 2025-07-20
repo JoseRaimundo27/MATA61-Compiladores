@@ -1,3 +1,4 @@
+%define parse.error verbose
 %{
 #include <stdio.h>
 #include <stdlib.h>
@@ -146,10 +147,15 @@ chamada_revelio:
 ;
 
 chamada_veritaserum:
-    VERITASERUM '(' ID ')' {
-        $$ = create_node("veritaserum", 1, create_node($3, 0));
+    VERITASERUM '(' expressao ')' LUMOX lista_declaracoes NOX {
+        $$ = create_node("veritaserum", 2, $3, $6);  // $3 = cond, $6 = bloco if
+    }
+  | VERITASERUM '(' expressao ')' LUMOX lista_declaracoes NOX
+    CRUCIO LUMOX lista_declaracoes NOX {
+        $$ = create_node("veritaserum", 3, $3, $6, $10);  // $3 = cond, $6 = bloco if, $10 = bloco else
     }
 ;
+
 
 lista_params:
     ID {

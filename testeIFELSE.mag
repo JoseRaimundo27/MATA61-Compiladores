@@ -1,6 +1,6 @@
 veritaserum (x > 0) lumox
-    y = y + 1
+    y = y + 1;
 nox
 crucio lumox
-    y = 0
-nox
+    y = 0;
+nox;
