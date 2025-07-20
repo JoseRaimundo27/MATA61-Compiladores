@@ -34,8 +34,15 @@ WS      [ \t]+
 
 %%
 
-"accioint"      { return ACCIOINT; }
-"acciofloat"    { return ACCIOFLOAT; }
+"accioint" {
+    yylval.str = strdup("accioint");
+    return ACCIOINT;
+}
+
+"acciofloat" {
+    yylval.str = strdup("acciofloat");
+    return ACCIOFLOAT;
+}
 "veritaserum"   { return VERITASERUM; }
 "crucio"        { return CRUCIO; }
 "conjurar"      { return CONJURAR; }
@@ -92,7 +99,7 @@ WS      [ \t]+
 [\t\r ]+    ;     // ignora espaço, tab e return
 [\n]+ ;
 
-
+\?     { /* ignora o caractere de interrogação */ }
 \"([^\\\"\n]*)\" {
     char* raw = strdup(yytext);
     raw[yyleng - 1] = '\0';           // remove aspa final
@@ -102,7 +109,8 @@ WS      [ \t]+
 }
 
 . {
-    printf("Token desconhecido: %s\n", yytext);
+    
+     printf("Token desconhecido: %s (dec: %d, hex: %02X)\n", yytext, yytext[0], yytext[0]);
 }
 
 %%
