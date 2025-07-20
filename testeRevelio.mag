@@ -1,0 +1,2 @@
+x : accioint = 5;
+revelio ("Resultado:", x);
