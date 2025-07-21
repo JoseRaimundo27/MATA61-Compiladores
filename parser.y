@@ -35,14 +35,14 @@ Node* root;
 
 %type <node> instrucao_conjurar instrucao_feitico
 %type <node> chamada_aparatar chamada_revelio chamada_veritaserum
-
+%token VAZIO RETORNAR
 %type <node> expressao
 
 %type <node> vetor lista_elementos
 %type <node> vetor_float lista_elementos_float
 
 %type <node> lista_params lista_args
-
+%type <node> tipo_retorno instrucao_retornar
 
 %left EQ NEQ
 %left LT GT LE GE
@@ -95,6 +95,7 @@ instrucao:
   | chamada_revelio
   | chamada_veritaserum
   | chamada_aparatar
+  | instrucao_retornar
 ;
 
 declaracao:
@@ -124,6 +125,29 @@ declaracao:
     Node* colon = create_node(":", 2, id_node, type_node);
     Node* assign = create_node("=", 1, $6);
     $$ = create_node("declaration", 2, colon, assign);}
+  | ID ':' ACCIOINT {
+    Node* id_node = create_node("identifier:", 1, create_node($1, 0));
+    Node* type_node = create_node("type:", 1, create_node($3, 0));
+    Node* colon = create_node(":", 2, id_node, type_node);
+    $$ = create_node("declaration", 1, colon);
+  	}
+	| ID ':' ACCIOFLOAT {
+    Node* id_node = create_node("identifier:", 1, create_node($1, 0));
+    Node* type_node = create_node("type:", 1, create_node($3, 0));
+    Node* colon = create_node(":", 2, id_node, type_node);
+    $$ = create_node("declaration", 1, colon);}
+	| ID ':' RELICARIO ACCIOINT {
+    Node* id_node = create_node("identifier:", 1, create_node($1, 0));
+    Node* relic_node = create_node("relicario", 1, create_node("accioint", 0));
+    Node* type_node = create_node("type:", 1, relic_node);
+    Node* colon = create_node(":", 2, id_node, type_node);
+    $$ = create_node("declaration", 1, colon);}
+	| ID ':' RELICARIO ACCIOFLOAT {
+    Node* id_node = create_node("identifier:", 1, create_node($1, 0));
+    Node* relic_node = create_node("relicario", 1, create_node("acciofloat", 0));
+    Node* type_node = create_node("type:", 1, relic_node);
+    Node* colon = create_node(":", 2, id_node, type_node);
+    $$ = create_node("declaration", 1, colon);};
 
 atribuicao:
     ID ASSIGN expressao {
@@ -131,18 +155,40 @@ atribuicao:
     	Node* assign = create_node("=", 2, id_node, $3);
     	$$ = create_node("instrucao", 1, assign);
     }
+     | ID '[' expressao ']' ASSIGN expressao {
+        Node* id_node = create_node("identifier:", 1, create_node($1, 0));
+        Node* index_node = create_node("index", 1, $3); // expressao que representa a posição
+        Node* vetor_elem = create_node("[]", 2, id_node, index_node);
+        Node* assign = create_node("=", 2, vetor_elem, $6);
+        $$ = create_node("instrucao", 1, assign);
+    };
+tipo_retorno:
+    ACCIOINT   { $$ = create_node("tipo", 1, create_node("accioint", 0)); }
+  | ACCIOFLOAT { $$ = create_node("tipo", 1, create_node("acciofloat", 0)); }
+  | VAZIO    { $$ = create_node("tipo", 1, create_node("vazio", 0)); }
 
 instrucao_conjurar:
-    CONJURAR ID '(' lista_params ')' LUMOX lista_declaracoes NOX ';' {
-        Node* id_node = create_node("identifier:", 1, create_node($2, 0));
-        Node* args_node = $4;
+    tipo_retorno CONJURAR ID '(' lista_params ')' LUMOX lista_declaracoes NOX ';' {
+        Node* tipo_node = $1;
+        Node* id_node = create_node("identifier:", 1, create_node($3, 0));
+        Node* args_node = $5;
+        Node* bloco_node = create_node("bloco", 1, $8);
+        $$ = create_node("conjurar", 4, tipo_node, id_node, args_node, bloco_node);
+    }
+  | tipo_retorno CONJURAR ID '(' ')' LUMOX lista_declaracoes NOX ';' {
+        Node* tipo_node = $1;
+        Node* id_node = create_node("identifier:", 1, create_node($3, 0));
+        Node* args_node = create_node("args", 0);
         Node* bloco_node = create_node("bloco", 1, $7);
-        $$ = create_node("conjurar", 3, id_node, args_node, bloco_node);}
-  | CONJURAR ID '(' ')' LUMOX lista_declaracoes NOX ';' {
-        Node* id_node = create_node("identifier:", 1, create_node($2, 0));
-        Node* args_node = create_node("args", 0);  // vazio
-        Node* bloco_node = create_node("bloco", 1, $6);
-        $$ = create_node("conjurar", 3, id_node, args_node, bloco_node);}
+        $$ = create_node("conjurar", 4, tipo_node, id_node, args_node, bloco_node);
+    }
+instrucao_retornar:
+    RETORNAR expressao {
+        $$ = create_node("retornar", 1, $2);
+    }
+  | RETORNAR  {
+        $$ = create_node("retornar", 0);
+    }
 instrucao_feitico:
     FEITICO '(' expressao ')' LUMOX lista_declaracoes NOX ';' {
         Node* expressao_node = create_node("()", 1, $3);
@@ -195,6 +241,15 @@ expressao:
   | ID {
         $$ = create_node($1, 0);
     }
+      | ID '(' lista_args ')' {
+      Node* id_node = create_node("identifier:", 1, create_node($1, 0));
+      $$ = create_node("call", 2, id_node, $3);
+  }
+  | ID '(' ')' {
+      Node* id_node = create_node("identifier:", 1, create_node($1, 0));
+      $$ = create_node("call", 2, id_node, create_node("args", 0));
+  }
+
   | expressao PLUS expressao {
         $$ = create_node("+", 2, $1, $3);
     }

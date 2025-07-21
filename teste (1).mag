@@ -1,0 +1,49 @@
+x: accioint = 5;
+y: acciofloat = 3.14;
+
+z: accioint = 2 * (3 + 4);
+w: acciofloat = 1.0 + 2.0 * 3.0;
+a = x + 2;
+b = y * 2.0;
+
+lista1: relicario accioint = [1, 2, 3];
+lista2: relicario acciofloat = [1.1, 2.2, 3.3];
+
+revelio("Oi mundo");
+revelio("Valor de x:", x);
+revelio("Soma:", x + y, 10, 2 * 3);
+
+accioint conjurar   somar(x, y) lumox
+    x: accioint = 2;
+    y: accioint = 3;
+    resultado = x + y;
+    revelio("Soma interna", resultado);
+nox;
+
+accioint conjurar   mostrarNotas(notas) lumox
+    notas: relicario acciofloat = [7.5, 8.0, 9.5];
+    revelio("Notas:", notas);
+    retornar notas;
+nox;
+veritaserum(x * 2 + 1) lumox
+    resultado: accioint = 1;
+nox;
+veritaserum(x > 1) lumox
+    revelio("Mensagem fixa");
+nox;
+feitico(x < 10) lumox
+    x = x + 1;
+    revelio("rodando");
+nox;
+aparatar teleportar();
+x : accioint = soma(3, 5);
+aparatar mover(x);
+aparatar somar(1, 2 * 3);
+aparatar calcular(x + y, z * 2 + 1);
+
+v : relicario accioint = [10, 20, 30];
+v[2] = 99;
+
+a : accioint;
+b : acciofloat;
+c : relicario accioint;

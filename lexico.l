@@ -74,6 +74,10 @@ WS      [ \t]+
 "["             { return '['; }
 "]"             { return ']'; }
 ";"     { return ';'; }
+"vazio" {
+    return VAZIO;
+}
+"retornar"      { return RETORNAR; }
 
 
 {ID} {
